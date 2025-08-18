@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:epkl/data/models/jurusan.dart';
 import 'package:epkl/data/models/kelas.dart';
 import 'package:epkl/presentation/providers/auth_provider.dart';
@@ -6,7 +8,10 @@ import 'package:epkl/presentation/providers/master_data_provider.dart';
 import 'package:epkl/presentation/ui/pages/login_page.dart';
 import 'package:epkl/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -19,6 +24,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _isSaving = false;
   int? _selectedJurusanId;
   int? _selectedKelasId;
+
+  File? _selectedImageFile;
+
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _nisnController;
@@ -42,6 +50,53 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
+
+    if (pickedFile != null) {
+      // Tampilkan dialog loading saat kompresi
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final compressedFile = await _compressImage(File(pickedFile.path));
+
+      Navigator.of(context).pop(); // Tutup dialog loading
+
+      if (compressedFile != null) {
+        setState(() {
+          _selectedImageFile = compressedFile;
+        });
+      }
+    }
+  }
+
+  Future<File?> _compressImage(File file) async {
+    final tempDir = await getTemporaryDirectory();
+    final targetPath =
+        '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality:
+          70, // Kualitas gambar (0-100), semakin rendah semakin kecil ukurannya
+      minWidth: 1024, // Resize gambar jika lebarnya lebih dari 1024px
+      minHeight: 1024, // Resize gambar jika tingginya lebih dari 1024px
+    );
+
+    if (result != null) {
+      return File(result.path);
+    }
+    return null;
+  }
+
   void _handleEditOrSave() async {
     if (!_isEditing) {
       setState(() {
@@ -63,6 +118,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       _isSaving = true;
     });
 
+    bool profileSuccess = true;
+    bool avatarSuccess = true;
+
     final success = await ref
         .read(authNotifierProvider.notifier)
         .updateProfile(
@@ -71,6 +129,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           kelasId: _selectedKelasId!,
           phone: _phoneController.text,
         );
+
+    if (_selectedImageFile != null && profileSuccess) {
+      avatarSuccess = await ref
+          .read(authNotifierProvider.notifier)
+          .updateAvatar(imageFile: _selectedImageFile!);
+    }
 
     setState(() {
       _isSaving = false;
@@ -82,6 +146,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         showAppSnackBar(context, message: 'Profil berhasil diperbarui!');
         setState(() {
           _isEditing = false;
+          _selectedImageFile = null;
         }); // Kembali ke mode view
       } else {
         showAppSnackBar(
@@ -159,14 +224,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               children: [
                 Center(
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: user.avatar != null
-                        ? NetworkImage(user.avatar!)
-                        : null,
-                    child: user.avatar == null
-                        ? const Icon(Icons.person, size: 50)
-                        : null,
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: _selectedImageFile != null
+                            ? FileImage(_selectedImageFile!) as ImageProvider
+                            : NetworkImage(user.avatar ?? ''),
+                        child: user.avatar == null && _selectedImageFile == null
+                            ? const Icon(Icons.person, size: 50)
+                            : null,
+                      ),
+                      if (_isEditing)
+                        Positioned(
+                          bottom: 0,
+                          right: -10,
+                          child: IconButton(
+                            icon: const CircleAvatar(
+                              radius: 15,
+                              child: Icon(Icons.edit, size: 15),
+                            ),
+                            onPressed: _pickImage,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 32),

@@ -1,4 +1,4 @@
-// lib/data/services/api_service.dart
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:epkl/data/models/jurusan.dart';
@@ -108,6 +108,35 @@ class ApiService {
       }
     } on DioException catch (e) {
       throw Exception('Error: ${e.response?.data['message'] ?? e.message}');
+    }
+  }
+
+  Future<User> updateAvatar({
+    required String nisn,
+    required File imageFile,
+  }) async {
+    try {
+      String fileName = imageFile.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        'nisn': nisn,
+        'avatar': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _dio.post('/siswa/profile/avatar', data: formData);
+
+      if (response.data['success'] == true) {
+        // Asumsi API avatar juga mengembalikan data user terbaru
+        return User.fromJson(response.data['data']);
+      } else {
+        throw Exception('Gagal update avatar: ${response.data['message']}');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error upload avatar: ${e.response?.data['message'] ?? e.message}',
+      );
     }
   }
 }

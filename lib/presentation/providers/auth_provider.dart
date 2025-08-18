@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:epkl/data/services/api_service.dart';
 import 'package:epkl/data/services/secure_storage_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,6 +106,27 @@ class AuthNotifier extends StateNotifier<AuthState> {
         } catch (e) {
           // Jika gagal, print error dan kembalikan false
           print('Update profile failed: $e');
+          return false;
+        }
+      },
+    );
+  }
+
+  Future<bool> updateAvatar({required File imageFile}) async {
+    final currentState = state;
+    return await currentState.maybeMap(
+      orElse: () async => false,
+      success: (successState) async {
+        try {
+          final updatedUser = await _apiService.updateAvatar(
+            nisn: successState.user.nisn,
+            imageFile: imageFile,
+          );
+          // Perbarui state dengan data user baru yg berisi URL avatar baru
+          state = AuthState.success(updatedUser);
+          return true;
+        } catch (e) {
+          print('Update avatar failed in Notifier: $e');
           return false;
         }
       },
