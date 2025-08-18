@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:epkl/data/models/attendance.dart';
 import 'package:epkl/data/models/jurusan.dart';
 import 'package:epkl/data/models/kelas.dart';
 import 'package:epkl/data/models/user_response.dart';
+import 'package:intl/intl.dart';
 import '../models/login_response.dart';
 import 'secure_storage_service.dart';
 
@@ -137,6 +139,29 @@ class ApiService {
       throw Exception(
         'Error upload avatar: ${e.response?.data['message'] ?? e.message}',
       );
+    }
+  }
+
+  Future<List<Attendance>> getAttendanceList({
+    required String nisn,
+    required DateTime dateStart,
+    required DateTime dateEnd,
+  }) async {
+    try {
+      // Format DateTime ke String 'yyyy-MM-dd'
+      final formatter = DateFormat('yyyy-MM-dd');
+      final response = await _dio.get(
+        '/attendance/list',
+        queryParameters: {
+          'nisn': nisn,
+          'date_start': formatter.format(dateStart),
+          'date_end': formatter.format(dateEnd),
+        },
+      );
+      final List<dynamic> listData = response.data['data'];
+      return listData.map((json) => Attendance.fromJson(json)).toList();
+    } on DioException catch (e) {
+      throw Exception('Failed to get attendance list: ${e.message}');
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
+import 'package:epkl/presentation/ui/pages/attendance_page.dart';
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
@@ -15,7 +16,11 @@ class _MainPageState extends State<MainPage> {
   int _page = 0;
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
-  static const List<Widget> _pages = <Widget>[HomePage(), ProfilePage()];
+  static const List<Widget> _pages = <Widget>[
+    HomePage(),
+    AttendanceListPage(),
+    ProfilePage(),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -38,6 +43,21 @@ class _MainPageState extends State<MainPage> {
               ).bottomNavigationBarTheme.selectedItemColor,
             ),
             label: 'Home',
+            labelStyle: TextStyle(
+              color: Theme.of(
+                context,
+              ).bottomNavigationBarTheme.selectedItemColor!,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          CurvedNavigationBarItem(
+            child: Icon(
+              Icons.check_circle_outline,
+              color: Theme.of(
+                context,
+              ).bottomNavigationBarTheme.selectedItemColor,
+            ),
+            label: 'Attendance',
             labelStyle: TextStyle(
               color: Theme.of(
                 context,
