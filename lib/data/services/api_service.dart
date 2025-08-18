@@ -1,6 +1,8 @@
 // lib/data/services/api_service.dart
 
 import 'package:dio/dio.dart';
+import 'package:epkl/data/models/jurusan.dart';
+import 'package:epkl/data/models/kelas.dart';
 import 'package:epkl/data/models/user_response.dart';
 import '../models/login_response.dart';
 import 'secure_storage_service.dart';
@@ -56,6 +58,56 @@ class ApiService {
       throw Exception(
         'Failed to get profile: ${e.response?.data['message'] ?? e.message}',
       );
+    }
+  }
+
+  Future<List<Jurusan>> getJurusanList() async {
+    try {
+      final response = await _dio.get('/jurusan');
+      final List<dynamic> listData = response.data['data'];
+      return listData.map((json) => Jurusan.fromJson(json)).toList();
+    } on DioException catch (e) {
+      throw Exception('Failed to get jurusan list: ${e.message}');
+    }
+  }
+
+  Future<List<Kelas>> getKelasList() async {
+    try {
+      final response = await _dio.get('/kelas');
+      // Ambil list dari key 'data' dan ubah menjadi List<Kelas>
+      final List<dynamic> listData = response.data['data'];
+      return listData.map((json) => Kelas.fromJson(json)).toList();
+    } on DioException catch (e) {
+      throw Exception('Failed to get kelas list: ${e.message}');
+    }
+  }
+
+  Future<User> updateProfile({
+    required String nisn,
+    required String name,
+    required int jurusanId,
+    required int kelasId,
+    required String phone,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/siswa/profile',
+        data: {
+          'nisn': nisn,
+          'name': name,
+          'm_jurusan_id': jurusanId.toString(),
+          'm_kelas_id': kelasId.toString(),
+          'phone': phone,
+        },
+      );
+
+      if (response.data['success'] == true) {
+        return User.fromJson(response.data['data']);
+      } else {
+        throw Exception('Gagal update profil: ${response.data['message']}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Error: ${e.response?.data['message'] ?? e.message}');
     }
   }
 }

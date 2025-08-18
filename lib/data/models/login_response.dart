@@ -6,6 +6,16 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'login_response.g.dart';
 
+int? _stringToInt(dynamic value) {
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
+String? _intToString(int? value) {
+  return value?.toString();
+}
+
 @JsonSerializable()
 class LoginResponse {
   final bool success;
@@ -44,9 +54,9 @@ class User {
   final String? avatar;
 
   // Field baru dari response profile
-  @JsonKey(name: 'm_jurusan_id')
+  @JsonKey(name: 'm_jurusan_id', fromJson: _stringToInt, toJson: _intToString)
   final int? mJurusanId;
-  @JsonKey(name: 'm_kelas_id')
+  @JsonKey(name: 'm_kelas_id', fromJson: _stringToInt, toJson: _intToString)
   final int? mKelasId;
   @JsonKey(name: 'm_dudi_id')
   final int? mDudiId;

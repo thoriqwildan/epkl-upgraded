@@ -72,4 +72,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _storageService.deleteNisn();
     state = const AuthState.initial();
   }
+
+  Future<bool> updateProfile({
+    required String name,
+    required int jurusanId,
+    required int kelasId,
+    required String phone,
+  }) async {
+    final currentState = state;
+
+    // Gunakan maybeMap untuk menangani state 'success' secara aman
+    return await currentState.maybeMap(
+      // Jika state bukan 'success', lakukan 'orElse'
+      orElse: () async => false,
+
+      // Callback ini hanya akan berjalan jika state saat ini adalah 'success'
+      success: (successState) async {
+        try {
+          final updatedUser = await _apiService.updateProfile(
+            // Akses 'user' dan 'nisn' dari parameter 'successState'
+            nisn: successState.user.nisn,
+            name: name,
+            jurusanId: jurusanId,
+            kelasId: kelasId,
+            phone: phone,
+          );
+
+          // Jika berhasil, perbarui state dengan data user yang baru
+          state = AuthState.success(updatedUser);
+          return true; // Kembalikan true untuk menandakan sukses
+        } catch (e) {
+          // Jika gagal, print error dan kembalikan false
+          print('Update profile failed: $e');
+          return false;
+        }
+      },
+    );
+  }
 }
