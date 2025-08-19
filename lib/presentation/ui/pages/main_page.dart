@@ -4,6 +4,7 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 import 'package:epkl/presentation/ui/pages/attendance_page.dart';
 import 'package:epkl/presentation/ui/pages/journal_page.dart';
+import 'package:epkl/presentation/ui/pages/setting_page.dart';
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
@@ -19,7 +20,7 @@ class _MainPageState extends State<MainPage> {
   int _page = 2;
 
   static const List<Widget> _pages = <Widget>[
-    SizedBox.shrink(),
+    SettingsPage(),
     JournalListPage(),
     HomePage(),
     AttendanceListPage(),
@@ -76,22 +77,11 @@ class _MainPageState extends State<MainPage> {
         buttonBackgroundColor: Theme.of(context).primaryColor,
         animationCurve: Curves.easeInOut,
         animationDuration: const Duration(milliseconds: 400),
-        height: 65, // Sesuaikan tinggi jika perlu
+        height: 65,
         onTap: (index) {
-          // Logika saat item di-tap
-          if (index == 0) {
-            // Jika item tengah (Tambah) ditekan, lakukan aksi
-            // (misalnya, navigasi ke halaman baru)
-            print('Buka halaman setting!');
-            // Navigator.push(context, MaterialPageRoute(builder: (context) => AddJournalPage()));
-
-            // Kita tidak memanggil setState, jadi halaman di belakangnya tidak berubah.
-          } else {
-            // Jika item lain ditekan, ganti halaman seperti biasa
-            setState(() {
-              _page = index;
-            });
-          }
+          setState(() {
+            _page = index;
+          });
         },
       ),
     );

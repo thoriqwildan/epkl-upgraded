@@ -188,17 +188,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
               orElse: () => const SizedBox.shrink(),
             ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () async {
-              await ref.read(authNotifierProvider.notifier).logout();
-              Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-                (route) => false,
-              );
-            },
-          ),
         ],
       ),
       body: authState.when(
