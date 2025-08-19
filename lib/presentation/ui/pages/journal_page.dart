@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:epkl/data/models/journal.dart';
 import 'package:epkl/presentation/providers/journal_provider.dart';
 import 'package:epkl/presentation/ui/pages/add_journal_page.dart';
@@ -39,9 +40,23 @@ class JournalListPage extends ConsumerWidget {
       // Tombol Tambah Jurnal
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddJournalPage()),
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) {
+                return const AddJournalPage();
+              },
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    return SharedAxisTransition(
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType:
+                          SharedAxisTransitionType.vertical, // Arah transisi
+                      child: child,
+                    );
+                  },
+              transitionDuration: const Duration(milliseconds: 400),
+            ),
           );
         },
         child: const Icon(Icons.add),
