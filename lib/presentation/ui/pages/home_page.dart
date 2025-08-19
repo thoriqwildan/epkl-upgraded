@@ -16,7 +16,8 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _HomePageState extends ConsumerState<HomePage>
+    with WidgetsBindingObserver {
   bool _isOffSite = false;
   bool _isSubmitting = false;
   double? _currentDistance;
@@ -24,12 +25,27 @@ class _HomePageState extends ConsumerState<HomePage> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _descriptionController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleCheckIn() async {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(attendanceStatusProvider.notifier).fetchStatus();
+    }
+  }
+
+  // LOGIKA DISATUKAN MENJADI SATU FUNGSI
+  Future<void> _handleAttendanceAction({required bool isCheckingIn}) async {
     if (_isOffSite && !_formKey.currentState!.validate()) {
       return;
     }
@@ -37,24 +53,16 @@ class _HomePageState extends ConsumerState<HomePage> {
     setState(() => _isSubmitting = true);
 
     try {
-      // --- PERBAIKAN UTAMA ADA DI SINI ---
       final user = ref
           .read(authNotifierProvider)
-          .maybeWhen(success: (userData) => userData, orElse: () => null);
-      if (user == null) {
-        throw Exception('Gagal mendapatkan data user. Silakan coba lagi.');
-      }
-      // ------------------------------------
+          .maybeWhen(success: (data) => data, orElse: () => null);
+      if (user == null) throw Exception('Gagal mendapatkan data user.');
 
       final isLocationCheckEnabled = ref.read(settingsNotifierProvider);
 
       if (isLocationCheckEnabled && !_isOffSite) {
-        final pklLat = double.tryParse(user.lat ?? '0.0');
-        final pklLng = double.tryParse(user.longitude ?? '0.0');
-
-        if (pklLat == null || pklLng == null) {
-          throw Exception('Lokasi PKL tidak valid di profil Anda.');
-        }
+        final pklLat = double.tryParse(user.lat ?? '0.0')!;
+        final pklLng = double.tryParse(user.longitude ?? '0.0')!;
 
         final locationService = LocationService();
         final currentPosition = await locationService.getCurrentPosition();
@@ -64,8 +72,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           pklLat,
           pklLng,
         );
-
-        // Update jarak di UI secara real-time sebelum check-in
         if (mounted) setState(() => _currentDistance = distance);
 
         if (distance > 100) {
@@ -75,13 +81,19 @@ class _HomePageState extends ConsumerState<HomePage> {
         }
       }
 
-      await ref
-          .read(attendanceStatusProvider.notifier)
-          .checkIn(
-            description: _isOffSite ? _descriptionController.text : null,
-          );
+      final notifier = ref.read(attendanceStatusProvider.notifier);
+      final description = _isOffSite ? _descriptionController.text : null;
+      String successMessage;
 
-      if (mounted) showAppSnackBar(context, message: 'Berhasil Check In!');
+      if (isCheckingIn) {
+        await notifier.checkIn(description: description);
+        successMessage = 'Berhasil Check In!';
+      } else {
+        await notifier.checkOut(description: description);
+        successMessage = 'Berhasil Check Out!';
+      }
+
+      if (mounted) showAppSnackBar(context, message: successMessage);
     } catch (e) {
       if (mounted)
         showAppSnackBar(context, message: e.toString(), isError: true);
@@ -90,21 +102,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  Future<void> _handleCheckOut() async {
-    // TODO: Implementasi logika Check Out
-    print("LOGIC CHECK OUT DI SINI");
-    showAppSnackBar(
-      context,
-      message: 'Fitur Check Out belum diimplementasikan',
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final statusState = ref.watch(attendanceStatusProvider);
     final authState = ref.watch(authNotifierProvider);
-
-    // Tentukan apakah tombol harus dinonaktifkan
     bool isButtonDisabled =
         _isSubmitting ||
         (_currentDistance != null && _currentDistance! > 100 && !_isOffSite);
@@ -112,7 +113,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          // Gunakan pola yang aman juga di sini
           authState.maybeWhen(
             success: (user) => 'Hai, ${user.name.split(' ').first}',
             orElse: () => 'Dashboard Absensi',
@@ -139,10 +139,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // --- UI UTAMA BERDASARKAN STATUS ---
                       if (!status.hasCheckedIn) ...[
                         ElevatedButton(
-                          onPressed: isButtonDisabled ? null : _handleCheckIn,
+                          onPressed: isButtonDisabled
+                              ? null
+                              : () =>
+                                    _handleAttendanceAction(isCheckingIn: true),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 20),
                           ),
@@ -156,50 +158,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 ),
                         ),
                         const SizedBox(height: 24),
-                        SwitchListTile(
-                          title: const Text(
-                            'Saya tidak berada di lokasi (Izin)',
-                          ),
-                          value: _isOffSite,
-                          onChanged: (value) =>
-                              setState(() => _isOffSite = value),
-                        ),
-                        if (_isOffSite) ...[
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _descriptionController,
-                            decoration: const InputDecoration(
-                              labelText: 'Alasan / Deskripsi Kegiatan',
-                              border: OutlineInputBorder(),
-                              hintText:
-                                  'Contoh: Sedang WFH karena ada acara keluarga',
-                            ),
-                            maxLines: 3,
-                            validator: (value) {
-                              if (_isOffSite &&
-                                  (value == null || value.isEmpty)) {
-                                return 'Alasan tidak boleh kosong jika tidak di lokasi';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                        const SizedBox(height: 16),
-                        if (!_isOffSite && _currentDistance != null)
-                          Text(
-                            'Jarak Anda dari lokasi: ${_currentDistance!.toStringAsFixed(0)} meter',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: _currentDistance! > 100
-                                  ? Colors.red
-                                  : Colors.green,
-                            ),
-                          ),
+                        _buildOffSiteSwitchAndDescription(),
                       ] else if (status.hasCheckedIn &&
                           !status.hasCheckedOut) ...[
-                        const Text('Anda sudah check in pada pukul:'),
+                        const Text(
+                          'Anda sudah check in pada pukul:',
+                          textAlign: TextAlign.center,
+                        ),
                         Text(
                           status.attendanceData!.checkInTime,
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 48,
                             fontWeight: FontWeight.bold,
@@ -208,14 +176,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: _isSubmitting ? null : _handleCheckOut,
+                          onPressed: isButtonDisabled
+                              ? null
+                              : () => _handleAttendanceAction(
+                                  isCheckingIn: false,
+                                ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 16,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 20),
                           ),
                           child: _isSubmitting
                               ? const CircularProgressIndicator(
@@ -226,6 +195,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   style: TextStyle(fontSize: 18),
                                 ),
                         ),
+                        const SizedBox(height: 24),
+                        _buildOffSiteSwitchAndDescription(),
                       ] else ...[
                         const Icon(
                           Icons.check_circle,
@@ -254,6 +225,48 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOffSiteSwitchAndDescription() {
+    return Column(
+      children: [
+        SwitchListTile(
+          title: const Text('Saya tidak berada di lokasi (Izin)'),
+          value: _isOffSite,
+          onChanged: (value) => setState(() {
+            _isOffSite = value;
+            _currentDistance = null; // Reset info jarak saat switch diubah
+          }),
+        ),
+        if (_isOffSite) ...[
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _descriptionController,
+            decoration: const InputDecoration(
+              labelText: 'Alasan / Deskripsi Kegiatan',
+              border: OutlineInputBorder(),
+              hintText: 'Contoh: Sedang WFH karena ada acara keluarga',
+            ),
+            maxLines: 3,
+            validator: (value) {
+              if (_isOffSite && (value == null || value.isEmpty)) {
+                return 'Alasan tidak boleh kosong jika tidak di lokasi';
+              }
+              return null;
+            },
+          ),
+        ],
+        const SizedBox(height: 16),
+        if (!_isOffSite && _currentDistance != null)
+          Text(
+            'Jarak Anda dari lokasi: ${_currentDistance!.toStringAsFixed(0)} meter',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: _currentDistance! > 100 ? Colors.red : Colors.green,
+            ),
+          ),
+      ],
     );
   }
 }

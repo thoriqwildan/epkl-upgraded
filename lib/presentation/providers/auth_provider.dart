@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:epkl/data/models/login_response.dart';
 import 'package:epkl/data/services/api_service.dart';
 import 'package:epkl/data/services/secure_storage_service.dart';
+import 'package:epkl/presentation/providers/attendance_status_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_state.dart';
 
@@ -18,14 +20,16 @@ final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
   return AuthNotifier(
     ref.watch(apiServiceProvider),
     ref.watch(secureStorageProvider),
+    ref,
   );
 });
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiService _apiService;
   final SecureStorageService _storageService;
+  final Ref _ref;
 
-  AuthNotifier(this._apiService, this._storageService)
+  AuthNotifier(this._apiService, this._storageService, this._ref)
     : super(const AuthState.initial());
 
   Future<void> checkAuthStatus() async {
@@ -61,6 +65,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await _storageService.saveNisn(nisn);
 
         state = AuthState.success(loginResponse.data.user);
+        _ref.invalidate(attendanceStatusProvider);
       } else {
         state = AuthState.error(loginResponse.message);
       }
@@ -73,6 +78,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _storageService.deleteToken();
     await _storageService.deleteNisn();
     state = const AuthState.initial();
+
+    _ref.invalidate(attendanceStatusProvider);
   }
 
   Future<bool> updateProfile({

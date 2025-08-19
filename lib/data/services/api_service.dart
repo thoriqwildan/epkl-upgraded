@@ -254,4 +254,30 @@ class ApiService {
       throw Exception('Error: ${e.response?.data['message'] ?? e.message}');
     }
   }
+
+  Future<Attendance> checkOut({
+    required String nisn,
+    required DateTime date,
+    String? description,
+  }) async {
+    try {
+      final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+      // Asumsi methodnya POST, sesuaikan jika berbeda (misal: PUT atau PATCH)
+      final response = await _dio.post(
+        '/attendance/check-out',
+        data: {'nisn': nisn, 'date': formattedDate, 'description': description},
+      );
+
+      if (response.data['success'] == true) {
+        // API mengembalikan data absensi yang sudah ter-update
+        return Attendance.fromJson(response.data['data']);
+      } else {
+        throw Exception(
+          'Gagal melakukan check-out: ${response.data['message']}',
+        );
+      }
+    } on DioException catch (e) {
+      throw Exception('Error: ${e.response?.data['message'] ?? e.message}');
+    }
+  }
 }

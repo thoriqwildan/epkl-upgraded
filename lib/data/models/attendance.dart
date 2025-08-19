@@ -5,8 +5,15 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'attendance.g.dart';
 
+int _dynamicToInt(dynamic value) {
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0; // Default value jika terjadi kesalahan
+}
+
 @JsonSerializable()
 class Attendance {
+  @JsonKey(fromJson: _dynamicToInt)
   final int id;
   final String date;
 

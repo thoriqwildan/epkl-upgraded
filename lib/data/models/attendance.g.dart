@@ -7,7 +7,7 @@ part of 'attendance.dart';
 // **************************************************************************
 
 Attendance _$AttendanceFromJson(Map<String, dynamic> json) => Attendance(
-  id: (json['id'] as num).toInt(),
+  id: _dynamicToInt(json['id']),
   date: json['date'] as String,
   checkIn: json['check_in'] as String?,
   checkOut: json['check_out'] as String?,
