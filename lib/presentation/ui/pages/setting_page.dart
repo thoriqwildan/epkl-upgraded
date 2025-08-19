@@ -17,6 +17,7 @@ class SettingsPage extends ConsumerWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
           title: const Text('Konfirmasi Logout'),
           content: const Text('Apakah Anda yakin ingin keluar dari akun Anda?'),
           actions: <Widget>[

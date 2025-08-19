@@ -33,10 +33,11 @@ class _AddJournalPageState extends ConsumerState<AddJournalPage> {
   }
 
   Future<void> _saveJournal() async {
-    // Validasi form
+    // 1. Validasi semua input di form
     if (_formKey.currentState!.validate()) {
       setState(() => _isSaving = true);
 
+      // 2. Panggil method createJournal dari Notifier
       final success = await ref
           .read(journalNotifierProvider.notifier)
           .createJournal(
@@ -46,9 +47,10 @@ class _AddJournalPageState extends ConsumerState<AddJournalPage> {
 
       setState(() => _isSaving = false);
 
+      // 3. Berikan feedback ke pengguna dan kembali ke halaman sebelumnya
       if (mounted && success) {
         showAppSnackBar(context, message: 'Jurnal berhasil disimpan!');
-        Navigator.of(context).pop(); // Kembali ke halaman daftar jurnal
+        Navigator.of(context).pop(); // Kembali ke JournalListPage
       } else if (mounted) {
         showAppSnackBar(
           context,

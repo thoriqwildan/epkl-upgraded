@@ -81,6 +81,7 @@ class MyApp extends StatelessWidget {
         ),
 
         cardTheme: const CardThemeData(color: AppColors.card),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       home: const AuthCheckerPage(),
     );
