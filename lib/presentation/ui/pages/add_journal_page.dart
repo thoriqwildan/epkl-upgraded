@@ -1,9 +1,11 @@
 // lib/presentation/ui/pages/add_journal_page.dart
 
 import 'package:epkl/presentation/providers/journal_provider.dart';
+import 'package:epkl/presentation/providers/setting_provider.dart';
 import 'package:epkl/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class AddJournalPage extends ConsumerStatefulWidget {
   const AddJournalPage({super.key});
@@ -18,11 +20,14 @@ class _AddJournalPageState extends ConsumerState<AddJournalPage> {
   late final TextEditingController _targetController;
   bool _isSaving = false;
 
+  late DateTime _selectedDate;
+
   @override
   void initState() {
     super.initState();
     _kegiatanController = TextEditingController();
     _targetController = TextEditingController();
+    _selectedDate = DateTime.now();
   }
 
   @override
@@ -30,6 +35,21 @@ class _AddJournalPageState extends ConsumerState<AddJournalPage> {
     _kegiatanController.dispose();
     _targetController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2022),
+      lastDate:
+          DateTime.now(), // Batasi agar tidak bisa memilih tanggal di masa depan
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
 
   Future<void> _saveJournal() async {
@@ -43,6 +63,7 @@ class _AddJournalPageState extends ConsumerState<AddJournalPage> {
           .createJournal(
             kegiatan: _kegiatanController.text,
             target: _targetController.text,
+            tanggal: _selectedDate,
           );
 
       setState(() => _isSaving = false);
@@ -63,6 +84,10 @@ class _AddJournalPageState extends ConsumerState<AddJournalPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDateManipulationEnabled = ref
+        .watch(settingsNotifierProvider)
+        .isDateManipulationEnabled;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Tambah Jurnal Harian')),
       body: Form(
@@ -70,6 +95,22 @@ class _AddJournalPageState extends ConsumerState<AddJournalPage> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
+            if (isDateManipulationEnabled) ...[
+              ListTile(
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Tanggal Jurnal'),
+                subtitle: Text(
+                  DateFormat(
+                    'EEEE, d MMMM yyyy',
+                    'id_ID',
+                  ).format(_selectedDate),
+                ),
+                trailing: const Icon(Icons.edit_outlined),
+                onTap: () => _selectDate(context),
+              ),
+              const Divider(),
+              const SizedBox(height: 16),
+            ],
             TextFormField(
               controller: _kegiatanController,
               decoration: const InputDecoration(

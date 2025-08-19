@@ -7,22 +7,35 @@ class SecretSettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Tonton state dari settingsNotifierProvider
-    final isLocationCheckEnabled = ref.watch(settingsNotifierProvider);
+    // Sekarang state-nya adalah objek AppSettings
+    final appSettings = ref.watch(settingsNotifierProvider);
+    final notifier = ref.read(settingsNotifierProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pengaturan Rahasia')),
       body: ListView(
+        padding: const EdgeInsets.all(8.0),
         children: [
           SwitchListTile(
-            title: const Text('Aktifkan Pengecekan Lokasi GPS'),
-            subtitle: Text('Jika nonaktif, Anda bisa check-in dari mana saja.'),
-            value: isLocationCheckEnabled,
+            title: const Text('Nonaktifkan Pengecekan Lokasi GPS'),
+            subtitle: const Text(
+              'Memungkinkan check-in & check-out dari mana saja.',
+            ),
+            value: appSettings.isLocationCheckDisabled,
             onChanged: (bool newValue) {
-              // Panggil method di notifier untuk mengubah dan menyimpan setting
-              ref
-                  .read(settingsNotifierProvider.notifier)
-                  .setLocationCheckEnabled(newValue);
+              notifier.setLocationCheckEnabled(newValue);
+            },
+          ),
+          const Divider(),
+          // --- SWITCH BARU UNTUK MANIPULASI TANGGAL ---
+          SwitchListTile(
+            title: const Text('Aktifkan Manipulasi Tanggal Jurnal'),
+            subtitle: const Text(
+              'Menampilkan pilihan tanggal di halaman tambah jurnal.',
+            ),
+            value: appSettings.isDateManipulationEnabled,
+            onChanged: (bool newValue) {
+              notifier.setDateManipulationEnabled(newValue);
             },
           ),
         ],

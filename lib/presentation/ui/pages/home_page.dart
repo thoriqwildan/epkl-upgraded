@@ -76,9 +76,9 @@ class _HomePageState extends ConsumerState<HomePage>
           .maybeWhen(success: (data) => data, orElse: () => null);
       if (user == null) throw Exception('Gagal mendapatkan data user.');
 
-      final isLocationCheckEnabled = ref.read(settingsNotifierProvider);
+      final appSettings = ref.read(settingsNotifierProvider);
 
-      if (isLocationCheckEnabled && !_isOffSite) {
+      if (!appSettings.isLocationCheckDisabled && !_isOffSite) {
         final pklLat = double.tryParse(user.lat ?? '0.0')!;
         final pklLng = double.tryParse(user.longitude ?? '0.0')!;
 

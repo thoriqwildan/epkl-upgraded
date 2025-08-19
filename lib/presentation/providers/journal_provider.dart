@@ -38,6 +38,7 @@ class JournalNotifier extends StateNotifier<AsyncValue<List<Journal>>> {
   Future<bool> createJournal({
     required String kegiatan,
     required String target,
+    required DateTime tanggal,
   }) async {
     try {
       final authState = _ref.read(authNotifierProvider);
@@ -51,7 +52,7 @@ class JournalNotifier extends StateNotifier<AsyncValue<List<Journal>>> {
 
       await apiService.createJournal(
         nisn: nisn,
-        tanggal: DateTime.now(), // Gunakan tanggal hari ini
+        tanggal: tanggal, // Gunakan tanggal hari ini
         kegiatan: kegiatan,
         target: target,
       );
