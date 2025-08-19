@@ -13,6 +13,7 @@ class JournalNotifier extends StateNotifier<AsyncValue<List<Journal>>> {
   }
 
   Future<void> fetchJournal() async {
+    if (!mounted) return;
     state = const AsyncValue.loading();
     try {
       final authState = _ref.read(authNotifierProvider);
@@ -66,6 +67,9 @@ class JournalNotifier extends StateNotifier<AsyncValue<List<Journal>>> {
 
 // Provider untuk JournalNotifier
 final journalNotifierProvider =
-    StateNotifierProvider<JournalNotifier, AsyncValue<List<Journal>>>((ref) {
+    StateNotifierProvider.autoDispose<
+      JournalNotifier,
+      AsyncValue<List<Journal>>
+    >((ref) {
       return JournalNotifier(ref);
     });
