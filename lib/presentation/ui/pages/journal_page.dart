@@ -1,3 +1,5 @@
+// lib/presentation/ui/pages/journal_list_page.dart
+
 import 'package:animations/animations.dart';
 import 'package:epkl/data/models/journal.dart';
 import 'package:epkl/presentation/providers/journal_provider.dart';
@@ -15,48 +17,60 @@ class JournalListPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Jurnal Harian')),
-      body: journalState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text('Gagal memuat data: $err'),
+
+      // --- PERUBAHAN 1: Bungkus Body dengan RefreshIndicator ---
+      body: RefreshIndicator(
+        color: Theme.of(context).colorScheme.onPrimary,
+        onRefresh: () =>
+            ref.read(journalNotifierProvider.notifier).fetchJournal(),
+        child: journalState.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: Colors.white),
           ),
+          error: (err, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Gagal memuat data: $err'),
+            ),
+          ),
+          data: (journals) {
+            // --- PERUBAHAN 2: Buat state "kosong" agar bisa di-scroll ---
+            if (journals.isEmpty) {
+              // Bungkus dengan ListView agar tetap bisa ditarik untuk refresh
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: const Center(
+                        child: Text('Belum ada entri jurnal.'),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: journals.length,
+              itemBuilder: (context, index) {
+                final journal = journals[index];
+                return JournalCard(journal: journal);
+              },
+            );
+          },
         ),
-        data: (journals) {
-          if (journals.isEmpty) {
-            return const Center(child: Text('Belum ada entri jurnal.'));
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: journals.length,
-            itemBuilder: (context, index) {
-              final journal = journals[index];
-              return JournalCard(journal: journal);
-            },
-          );
-        },
       ),
-      // Tombol Tambah Jurnal
+
+      // Tombol Tambah Jurnal (tidak ada perubahan)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) {
-                return const AddJournalPage();
-              },
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                    return SharedAxisTransition(
-                      animation: animation,
-                      secondaryAnimation: secondaryAnimation,
-                      transitionType:
-                          SharedAxisTransitionType.vertical, // Arah transisi
-                      child: child,
-                    );
-                  },
-              transitionDuration: const Duration(milliseconds: 400),
-            ),
+            // Menggunakan MaterialPageRoute agar transisi mengikuti tema global
+            MaterialPageRoute(builder: (context) => const AddJournalPage()),
           );
         },
         child: const Icon(Icons.add),
@@ -66,7 +80,7 @@ class JournalListPage extends ConsumerWidget {
   }
 }
 
-// Widget untuk menampilkan satu item jurnal agar lebih rapi
+// Widget JournalCard (tidak ada perubahan)
 class JournalCard extends StatelessWidget {
   final Journal journal;
   const JournalCard({super.key, required this.journal});
@@ -89,14 +103,15 @@ class JournalCard extends StatelessWidget {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: Colors.blueAccent,
+                color: Colors
+                    .white, // Anda mungkin ingin mengubah ini ke warna tema
               ),
             ),
             const Divider(height: 20),
             Text(
               journal.kegiatan,
               style: const TextStyle(fontSize: 14, height: 1.5),
-              maxLines: 4, // Batasi teks kegiatan agar tidak terlalu panjang
+              maxLines: 4,
               overflow: TextOverflow.ellipsis,
             ),
           ],

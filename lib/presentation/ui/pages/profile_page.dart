@@ -415,7 +415,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
           filled: !_isEditing || !enabled,
-          fillColor: Colors.grey.shade200,
           disabledBorder: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             borderSide: BorderSide(color: Colors.grey),

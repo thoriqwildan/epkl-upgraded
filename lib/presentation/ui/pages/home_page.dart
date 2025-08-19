@@ -16,24 +16,42 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<HomePage> createState() => _HomePageState();
 }
 
+// Tambahkan 'TickerProviderStateMixin' untuk bisa menjalankan animasi
 class _HomePageState extends ConsumerState<HomePage>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, TickerProviderStateMixin {
+  // State untuk UI lokal
   bool _isOffSite = false;
   bool _isSubmitting = false;
   double? _currentDistance;
   final _descriptionController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  // Variabel baru untuk controller animasi
+  late final AnimationController _animationController;
+  late final Animation<double> _animation;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // Inisialisasi controller animasi
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true); // Animasi akan berulang (maju-mundur)
+
+    // Definisikan animasi (memperbesar dan memperkecil antara 100% dan 105%)
+    _animation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _descriptionController.dispose();
+    _animationController.dispose(); // Jangan lupa dispose controller animasi
     super.dispose();
   }
 
@@ -44,7 +62,7 @@ class _HomePageState extends ConsumerState<HomePage>
     }
   }
 
-  // LOGIKA DISATUKAN MENJADI SATU FUNGSI
+  // Logika untuk check-in dan check-out (tidak ada perubahan dari versi sebelumnya)
   Future<void> _handleAttendanceAction({required bool isCheckingIn}) async {
     if (_isOffSite && !_formKey.currentState!.validate()) {
       return;
@@ -112,11 +130,13 @@ class _HomePageState extends ConsumerState<HomePage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          authState.maybeWhen(
-            success: (user) => 'Hai, ${user.name.split(' ').first}',
-            orElse: () => 'Dashboard Absensi',
-          ),
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            const FlutterLogo(),
+            const SizedBox(width: 12),
+            const Text('E-PKL Remastered'),
+          ],
         ),
       ),
       body: RefreshIndicator(
@@ -131,7 +151,7 @@ class _HomePageState extends ConsumerState<HomePage>
               padding: const EdgeInsets.all(24.0),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height * 0.7,
+                  minHeight: MediaQuery.of(context).size.height * 0.75,
                 ),
                 child: Form(
                   key: _formKey,
@@ -139,84 +159,21 @@ class _HomePageState extends ConsumerState<HomePage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (!status.hasCheckedIn) ...[
-                        ElevatedButton(
-                          onPressed: isButtonDisabled
-                              ? null
-                              : () =>
-                                    _handleAttendanceAction(isCheckingIn: true),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                          ),
-                          child: _isSubmitting
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                )
-                              : const Text(
-                                  'Check In Sekarang',
-                                  style: TextStyle(fontSize: 18),
-                                ),
+                      // TOMBOL MELINGKAR DENGAN ANIMASI
+                      ScaleTransition(
+                        scale: _animation,
+                        child: _buildMainAttendanceButton(
+                          status,
+                          isButtonDisabled,
                         ),
-                        const SizedBox(height: 24),
+                      ),
+
+                      const SizedBox(height: 48),
+
+                      // Tampilkan switch & deskripsi jika absensi belum selesai
+                      if (!status.hasCheckedIn ||
+                          (status.hasCheckedIn && !status.hasCheckedOut))
                         _buildOffSiteSwitchAndDescription(),
-                      ] else if (status.hasCheckedIn &&
-                          !status.hasCheckedOut) ...[
-                        const Text(
-                          'Anda sudah check in pada pukul:',
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          status.attendanceData!.checkInTime,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: isButtonDisabled
-                              ? null
-                              : () => _handleAttendanceAction(
-                                  isCheckingIn: false,
-                                ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                          ),
-                          child: _isSubmitting
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                )
-                              : const Text(
-                                  'Check Out Sekarang',
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                        ),
-                        const SizedBox(height: 24),
-                        _buildOffSiteSwitchAndDescription(),
-                      ] else ...[
-                        const Icon(
-                          Icons.check_circle,
-                          color: Colors.green,
-                          size: 64,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Absensi hari ini telah selesai.',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text('Check In: ${status.attendanceData!.checkInTime}'),
-                        Text(
-                          'Check Out: ${status.attendanceData!.checkOutTime}',
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -228,6 +185,100 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
+  // Widget helper untuk membangun tombol utama
+  Widget _buildMainAttendanceButton(dynamic status, bool isDisabled) {
+    Widget buttonContent;
+    VoidCallback? onPressed;
+    Color buttonColor = Theme.of(context).primaryColor;
+
+    if (!status.hasCheckedIn) {
+      buttonContent = const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.touch_app_outlined, size: 48),
+          SizedBox(height: 8),
+          Text(
+            'CHECK IN',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      );
+      onPressed = isDisabled
+          ? null
+          : () => _handleAttendanceAction(isCheckingIn: true);
+    } else if (status.hasCheckedIn && !status.hasCheckedOut) {
+      buttonColor = Colors.redAccent;
+      buttonContent = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Sudah Check In:'),
+          Text(
+            status.attendanceData!.checkInTime,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const Divider(
+            color: Colors.white54,
+            height: 24,
+            indent: 30,
+            endIndent: 30,
+          ),
+          const Text(
+            'CHECK OUT',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      );
+      onPressed = isDisabled
+          ? null
+          : () => _handleAttendanceAction(isCheckingIn: false);
+    } else {
+      _animationController.stop();
+      buttonColor = Colors.green;
+      buttonContent = const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.check_circle, size: 48, color: Colors.white),
+          SizedBox(height: 8),
+          Text(
+            'SELESAI',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      );
+      onPressed = null;
+    }
+
+    return SizedBox(
+      width: 220,
+      height: 220,
+      child: ElevatedButton(
+        onPressed: _isSubmitting ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          shape: const CircleBorder(),
+          backgroundColor: buttonColor,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: Colors.grey.shade400,
+        ),
+        child: _isSubmitting
+            ? const CircularProgressIndicator(color: Colors.white)
+            : buttonContent,
+      ),
+    );
+  }
+
+  // Widget helper untuk switch dan deskripsi (tidak berubah)
   Widget _buildOffSiteSwitchAndDescription() {
     return Column(
       children: [
@@ -236,7 +287,7 @@ class _HomePageState extends ConsumerState<HomePage>
           value: _isOffSite,
           onChanged: (value) => setState(() {
             _isOffSite = value;
-            _currentDistance = null; // Reset info jarak saat switch diubah
+            _currentDistance = null;
           }),
         ),
         if (_isOffSite) ...[

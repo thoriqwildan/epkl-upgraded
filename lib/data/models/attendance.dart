@@ -11,16 +11,21 @@ int _dynamicToInt(dynamic value) {
   return 0; // Default value jika terjadi kesalahan
 }
 
+String? _dynamicToString(dynamic value) {
+  if (value == null) return null;
+  return value.toString();
+}
+
 @JsonSerializable()
 class Attendance {
   @JsonKey(fromJson: _dynamicToInt)
   final int id;
   final String date;
 
-  @JsonKey(name: 'check_in')
+  @JsonKey(name: 'check_in', fromJson: _dynamicToString)
   final String? checkIn;
 
-  @JsonKey(name: 'check_out')
+  @JsonKey(name: 'check_out', fromJson: _dynamicToString)
   final String? checkOut;
 
   final String? description;

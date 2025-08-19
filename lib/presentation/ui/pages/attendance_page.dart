@@ -27,8 +27,9 @@ class _AttendanceListPageState extends ConsumerState<AttendanceListPage> {
     });
   }
 
-  void _fetchData() {
+  Future<void> _fetchData() async {
     final filter = DateFilter(start: _startDate, end: _endDate);
+    // Kita tidak perlu await di sini, karena onRefresh akan menunggunya
     ref.read(attendanceNotifierProvider.notifier).fetchAttendance(filter);
   }
 
@@ -89,25 +90,43 @@ class _AttendanceListPageState extends ConsumerState<AttendanceListPage> {
           const Divider(),
           // --- Daftar Absensi ---
           Expanded(
-            child: attendanceState.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
-              data: (attendances) {
-                if (attendances.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'Tidak ada data absensi pada rentang tanggal ini.',
-                    ),
+            child: RefreshIndicator(
+              color: Colors.white,
+              onRefresh: _fetchData,
+              child: attendanceState.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+                error: (err, stack) => Center(child: Text('Error: $err')),
+                data: (attendances) {
+                  if (attendances.isEmpty) {
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Tidak ada data absensi pada rentang tanggal ini.',
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: attendances.length,
+                    itemBuilder: (context, index) {
+                      final attendance = attendances[index];
+                      return AttendanceCard(attendance: attendance);
+                    },
                   );
-                }
-                return ListView.builder(
-                  itemCount: attendances.length,
-                  itemBuilder: (context, index) {
-                    final attendance = attendances[index];
-                    return AttendanceCard(attendance: attendance);
-                  },
-                );
-              },
+                },
+              ),
             ),
           ),
         ],

@@ -9,8 +9,8 @@ part of 'attendance.dart';
 Attendance _$AttendanceFromJson(Map<String, dynamic> json) => Attendance(
   id: _dynamicToInt(json['id']),
   date: json['date'] as String,
-  checkIn: json['check_in'] as String?,
-  checkOut: json['check_out'] as String?,
+  checkIn: _dynamicToString(json['check_in']),
+  checkOut: _dynamicToString(json['check_out']),
   description: json['description'] as String?,
   nisn: json['nisn'] as String,
 );
