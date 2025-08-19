@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:epkl/data/models/attendance.dart';
+import 'package:epkl/data/models/attendance_status.dart';
 import 'package:epkl/data/models/journal.dart';
 import 'package:epkl/data/models/jurusan.dart';
 import 'package:epkl/data/models/kelas.dart';
@@ -203,6 +204,51 @@ class ApiService {
         return Journal.fromJson(response.data['data']);
       } else {
         throw Exception('Gagal membuat jurnal: ${response.data['message']}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Error: ${e.response?.data['message'] ?? e.message}');
+    }
+  }
+
+  Future<AttendanceStatus> getTodayAttendanceStatus({
+    required String nisn,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/attendance/',
+        queryParameters: {'nisn': nisn},
+      );
+      return AttendanceStatus.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404 ||
+          e.response?.data['success'] == false) {
+        return AttendanceStatus.fromJson(
+          e.response?.data ?? {'success': false},
+        );
+      }
+      throw Exception('Failed to get today\'s attendance status: ${e.message}');
+    }
+  }
+
+  Future<Attendance> checkIn({
+    required String nisn,
+    required DateTime date,
+    String? description,
+  }) async {
+    try {
+      final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+      final response = await _dio.post(
+        '/attendance/check-in',
+        data: {'nisn': nisn, 'date': formattedDate, 'description': description},
+      );
+
+      if (response.data['success'] == true) {
+        // API mengembalikan data absensi yang baru dibuat
+        return Attendance.fromJson(response.data['data']);
+      } else {
+        throw Exception(
+          'Gagal melakukan check-in: ${response.data['message']}',
+        );
       }
     } on DioException catch (e) {
       throw Exception('Error: ${e.response?.data['message'] ?? e.message}');

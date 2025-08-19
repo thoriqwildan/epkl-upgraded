@@ -1,7 +1,42 @@
+import 'dart:async';
+
+import 'package:epkl/presentation/ui/pages/secret_setting_page.dart';
 import 'package:flutter/material.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
+
+  @override
+  State<AboutPage> createState() => _AboutPageState();
+}
+
+class _AboutPageState extends State<AboutPage> {
+  int _tapCount = 0;
+  Timer? _tapTimer;
+
+  void _handleLogoTap() {
+    _tapCount++;
+    _tapTimer?.cancel();
+
+    if (_tapCount == 3) {
+      _tapCount = 0;
+      print("Membuka halaman rahasia");
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SecretSettingsPage()),
+      );
+    } else {
+      _tapTimer = Timer(const Duration(seconds: 1), () {
+        _tapCount = 0;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tapTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +48,10 @@ class AboutPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Ganti dengan logo aplikasi Anda jika ada
-              const FlutterLogo(size: 80),
+              GestureDetector(
+                onTap: _handleLogoTap,
+                child: const FlutterLogo(size: 80),
+              ),
               const SizedBox(height: 24),
               const Text(
                 'Aplikasi EPKL',

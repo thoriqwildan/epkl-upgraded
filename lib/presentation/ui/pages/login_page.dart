@@ -83,18 +83,14 @@ class LoginPage extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
 
-              // =========== BAGIAN YANG DIPERBAIKI ADA DI SINI ===========
               Consumer(
                 builder: (context, ref, child) {
                   final authState = ref.watch(authNotifierProvider);
-
-                  // Gunakan .maybeWhen untuk menangani state tertentu
                   return authState.maybeWhen(
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
                     orElse: () => ElevatedButton(
                       onPressed: () {
-                        // Logika onPressed tetap sama
                         if (_formKey.currentState!.validate()) {
                           ref
                               .read(authNotifierProvider.notifier)

@@ -30,5 +30,7 @@
 	<string>NSApplication</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Aplikasi ini memerlukan akses ke galeri untuk memilih gambar profil.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Aplikasi ini memerlukan akses lokasi Anda untuk fitur absensi check-in dan check-out.</string>
 </dict>
 </plist>
