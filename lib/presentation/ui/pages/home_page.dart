@@ -1,5 +1,7 @@
 // lib/presentation/ui/pages/home_page.dart
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:epkl/data/services/location_service.dart';
 import 'package:epkl/presentation/providers/auth_provider.dart';
 import 'package:epkl/presentation/providers/attendance_status_provider.dart';
@@ -20,7 +22,6 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  // State untuk UI lokal
   bool _isOffSite = false;
   bool _isSubmitting = false;
   double? _currentDistance;
@@ -29,7 +30,6 @@ class _HomePageState extends ConsumerState<HomePage>
   bool _isCheckingDistance = false;
   bool isButtonDisabled = false;
 
-  // Variabel baru untuk controller animasi
   late final AnimationController _animationController;
   late final Animation<double> _animation;
 
@@ -48,7 +48,6 @@ class _HomePageState extends ConsumerState<HomePage>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Kita hanya cek jarak jika mode default-nya adalah "Di Lokasi"
       if (!_isOffSite) {
         _updateDistance();
       }
@@ -56,7 +55,6 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   Future<void> _updateDistance() async {
-    // Tampilkan loading kecil di area jarak
     setState(() {
       _isCheckingDistance = true;
       _currentDistance = null;
@@ -80,7 +78,6 @@ class _HomePageState extends ConsumerState<HomePage>
         pklLng,
       );
 
-      // Setelah jarak didapat, update state untuk menampilkan di UI
       if (mounted) {
         setState(() {
           _currentDistance = distance;
@@ -89,13 +86,11 @@ class _HomePageState extends ConsumerState<HomePage>
     } catch (e) {
       if (mounted) {
         showAppSnackBar(context, message: e.toString(), isError: true);
-        // Set jarak ke nilai error agar tombol disable
         setState(() {
           _currentDistance = double.infinity;
         });
       }
     } finally {
-      // Hentikan loading
       if (mounted) {
         setState(() {
           _isCheckingDistance = false;
@@ -108,7 +103,7 @@ class _HomePageState extends ConsumerState<HomePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _descriptionController.dispose();
-    _animationController.dispose(); // Jangan lupa dispose controller animasi
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -158,7 +153,6 @@ class _HomePageState extends ConsumerState<HomePage>
 
       if (mounted) showAppSnackBar(context, message: successMessage);
 
-      // Reset state setelah berhasil
       setState(() {
         _isOffSite = false;
         _descriptionController.clear();
@@ -177,9 +171,6 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget build(BuildContext context) {
     final statusState = ref.watch(attendanceStatusProvider);
     final authState = ref.watch(authNotifierProvider);
-    // bool isButtonDisabled =
-    //     _isSubmitting ||
-    //     (_currentDistance != null && _currentDistance! > 100 && !_isOffSite);
 
     return Scaffold(
       appBar: AppBar(
@@ -263,7 +254,6 @@ class _HomePageState extends ConsumerState<HomePage>
 
     final appSettings = ref.watch(settingsNotifierProvider);
     if (appSettings.isLocationCheckDisabled) {
-      // Jika GPS check dinonaktifkan dari setting rahasia, tombol tidak pernah disable karena jarak
       isButtonDisabled = _isSubmitting;
     }
 
@@ -325,7 +315,6 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  // Widget helper untuk membangun tombol utama
   Widget _buildMainAttendanceButton(dynamic status, bool isDisabled) {
     Widget buttonContent;
     VoidCallback? onPressed;
@@ -335,7 +324,6 @@ class _HomePageState extends ConsumerState<HomePage>
     if (!status.hasCheckedIn) {
       buttonColor = theme.colorScheme.primary;
       buttonContent = const Column(
-        // ... konten sama
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.touch_app_outlined, size: 48),
@@ -354,10 +342,8 @@ class _HomePageState extends ConsumerState<HomePage>
           ? null
           : () => _handleAttendanceAction(isCheckingIn: true);
     } else if (status.hasCheckedIn && !status.hasCheckedOut) {
-      buttonColor =
-          theme.colorScheme.error; // Menggunakan warna error dari theme
+      buttonColor = theme.colorScheme.error;
       buttonContent = Column(
-        // ... konten sama
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text('Sudah Check In:'),
@@ -386,11 +372,8 @@ class _HomePageState extends ConsumerState<HomePage>
           : () => _handleAttendanceAction(isCheckingIn: false);
     } else {
       _animationController.stop();
-      buttonColor = Colors
-          .green
-          .shade600; // Warna sukses bisa tetap, atau ambil dari theme jika ada
+      buttonColor = Colors.green.shade600;
       buttonContent = const Column(
-        // ... konten sama
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.check_circle, size: 48, color: Colors.white),
@@ -426,7 +409,6 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  // Widget helper untuk switch dan deskripsi (tidak berubah)
   Widget _buildOffSiteSwitchAndDescription() {
     return Column(
       children: [
@@ -454,8 +436,6 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  // Letakkan ini di dalam class _HomePageState
-
   Widget _buildAttendanceModeToggle() {
     final theme = Theme.of(context);
 
@@ -463,7 +443,6 @@ class _HomePageState extends ConsumerState<HomePage>
         .watch(settingsNotifierProvider)
         .isLocationCheckDisabled;
     if (isGpsCheckDisabledBySecretSetting) {
-      // Jika GPS dinonaktifkan dari pusat, jangan tampilkan toggle ini sama sekali
       return const SizedBox.shrink();
     }
 
@@ -540,7 +519,6 @@ class _HomePageState extends ConsumerState<HomePage>
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            // Hapus SizedBox yang membatasi tinggi
             infoListState.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, stack) =>
@@ -551,7 +529,6 @@ class _HomePageState extends ConsumerState<HomePage>
                     child: Text('Tidak ada informasi saat ini.'),
                   );
                 }
-                // --- PERUBAHAN UTAMA DI SINI ---
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -566,58 +543,6 @@ class _HomePageState extends ConsumerState<HomePage>
           ],
         );
       },
-    );
-  }
-
-  Widget _buildQuickAccess(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Akses Cepat',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.05),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            leading: Icon(
-              Icons.edit_document,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-            title: const Text('Isi Jurnal Harian'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Navigasi ke halaman Jurnal
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.05),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            leading: Icon(
-              Icons.history,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-            title: const Text('Lihat Riwayat Absensi'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // TODO: Navigasi ke halaman Riwayat
-            },
-          ),
-        ),
-      ],
     );
   }
 }
