@@ -39,7 +39,7 @@ class KelasDropdownField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<int>(
         isExpanded: true,
-        value: selectedKelasId,
+        initialValue: selectedKelasId,
         menuMaxHeight: 300.0,
         borderRadius: BorderRadius.circular(12),
         items: filteredKelasList.map((kelas) {

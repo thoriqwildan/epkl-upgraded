@@ -33,7 +33,7 @@ class JurusanDropdownField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<int>(
         isExpanded: true,
-        value: selectedJurusanId,
+        initialValue: selectedJurusanId,
         menuMaxHeight: 300.0,
         borderRadius: BorderRadius.circular(12),
         items: jurusanList.map((jurusan) {

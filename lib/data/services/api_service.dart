@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:epkl/data/models/attendance.dart';
 import 'package:epkl/data/models/attendance_status.dart';
+import 'package:epkl/data/models/info_detail.dart';
+import 'package:epkl/data/models/info_list_response.dart';
 import 'package:epkl/data/models/journal.dart';
 import 'package:epkl/data/models/jurusan.dart';
 import 'package:epkl/data/models/kelas.dart';
@@ -278,6 +280,28 @@ class ApiService {
       }
     } on DioException catch (e) {
       throw Exception('Error: ${e.response?.data['message'] ?? e.message}');
+    }
+  }
+
+  Future<InfoListResponse> getInfoList({int limit = 5, int page = 1}) async {
+    try {
+      final response = await _dio.get(
+        '/info',
+        queryParameters: {'limit': limit, 'page': page},
+      );
+      return InfoListResponse.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      throw Exception('Failed to get info list: ${e.message}');
+    }
+  }
+
+  // FUNGSI BARU UNTUK MENGAMBIL DETAIL INFO
+  Future<InfoDetail> getInfoDetail({required int id}) async {
+    try {
+      final response = await _dio.get('/info', queryParameters: {'id': id});
+      return InfoDetail.fromJson(response.data['data']);
+    } on DioException catch (e) {
+      throw Exception('Failed to get info detail: ${e.message}');
     }
   }
 }
