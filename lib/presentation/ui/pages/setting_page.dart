@@ -1,6 +1,7 @@
 import 'package:epkl/presentation/providers/auth_provider.dart';
 import 'package:epkl/presentation/ui/pages/about_page.dart'; // Akan kita buat
 import 'package:epkl/presentation/ui/pages/login_page.dart';
+import 'package:epkl/presentation/ui/pages/theme_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -60,6 +61,17 @@ class SettingsPage extends ConsumerWidget {
       appBar: AppBar(title: const Text('Pengaturan')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.palette_outlined),
+            title: const Text('Pilih Tema'),
+            subtitle: const Text('Ubah tampilan warna aplikasi.'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ThemePage()),
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Tentang Aplikasi'),

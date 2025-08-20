@@ -2,11 +2,12 @@
 
 import 'dart:io';
 
-import 'package:epkl/data/models/jurusan.dart';
-import 'package:epkl/data/models/kelas.dart';
 import 'package:epkl/presentation/providers/auth_provider.dart';
 import 'package:epkl/presentation/providers/auth_state.dart';
 import 'package:epkl/presentation/providers/master_data_provider.dart';
+import 'package:epkl/presentation/ui/widgets/jurusan_dropdown_field.dart';
+import 'package:epkl/presentation/ui/widgets/kelas_dropdown_field.dart';
+import 'package:epkl/presentation/ui/widgets/profile_text_field.dart';
 import 'package:epkl/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -242,185 +243,75 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 const SizedBox(height: 32),
 
-                _buildProfileTextField(
+                ProfileTextField(
                   controller: _nameController,
                   label: 'Nama Lengkap',
                   icon: Icons.person_outline,
+                  isEditing: _isEditing,
                 ),
-                _buildProfileTextField(
+                ProfileTextField(
                   controller: _emailController,
                   label: 'Email',
                   icon: Icons.email_outlined,
-                  enabled: false,
+                  isEditing: _isEditing,
+                  isEnabledInEditMode: false,
                 ),
-                _buildProfileTextField(
+                ProfileTextField(
                   controller: _nisnController,
                   label: 'NISN',
                   icon: Icons.badge_outlined,
-                  enabled: false,
+                  isEditing: _isEditing,
+                  isEnabledInEditMode: false,
                 ),
 
                 jurusanAsyncValue.when(
-                  data: (jurusanList) => _isEditing
-                      ? _buildJurusanDropdown(jurusanList)
-                      : _buildProfileTextField(
-                          controller: TextEditingController(
-                            text: user.jurusan?.name ?? '-',
-                          ),
-                          label: 'Jurusan',
-                          icon: Icons.school_outlined,
-                          enabled: false,
-                        ),
-                  loading: () => const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Center(child: CircularProgressIndicator()),
+                  data: (jurusanList) => JurusanDropdownField(
+                    isEditing: _isEditing,
+                    jurusanList: jurusanList,
+                    selectedJurusanId: _selectedJurusanId,
+                    initialValueText: user.jurusan?.name ?? '-',
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedJurusanId = value;
+                        _selectedKelasId =
+                            null; // Reset kelas saat jurusan berubah
+                      });
+                    },
                   ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Text('Gagal memuat jurusan: $e'),
                 ),
 
                 kelasAsyncValue.when(
-                  data: (kelasList) => _isEditing
-                      ? _buildKelasDropdown(kelasList)
-                      : _buildProfileTextField(
-                          controller: TextEditingController(
-                            text: user.kelas?.name ?? '-',
-                          ),
-                          label: 'Kelas',
-                          icon: Icons.class_outlined,
-                          enabled: false,
-                        ),
-                  loading: () => const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Center(child: CircularProgressIndicator()),
+                  data: (kelasList) => KelasDropdownField(
+                    isEditing: _isEditing,
+                    kelasList: kelasList,
+                    selectedJurusanId: _selectedJurusanId,
+                    selectedKelasId: _selectedKelasId,
+                    initialValueText: user.kelas?.name ?? '-',
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedKelasId = value;
+                      });
+                    },
                   ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, st) => Text('Gagal memuat kelas: $e'),
                 ),
 
-                _buildProfileTextField(
+                ProfileTextField(
                   controller: _phoneController,
                   label: 'Nomor HP',
                   icon: Icons.phone_outlined,
+                  isEditing: _isEditing,
                   keyboardType: TextInputType.phone,
                 ),
               ],
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildJurusanDropdown(List<Jurusan> jurusanList) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: DropdownButtonFormField<int>(
-        isExpanded: true,
-        initialValue: _selectedJurusanId,
-
-        // --- PROPERTI BARU UNTUK STYLING ---
-        menuMaxHeight: 300.0, // Batasi tinggi menu maksimal 300 pixel
-        dropdownColor: Colors.white, // Warna background menu
-        borderRadius: BorderRadius.circular(12), // Sudut melengkung
-        // ------------------------------------
-        items: jurusanList.map((jurusan) {
-          return DropdownMenuItem<int>(
-            value: jurusan.id,
-            child: Expanded(
-              child: Text(jurusan.name, overflow: TextOverflow.ellipsis),
-            ),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            _selectedJurusanId = value;
-            _selectedKelasId = null;
-          });
-        },
-        decoration: const InputDecoration(
-          labelText: 'Jurusan',
-          prefixIcon: Icon(Icons.school_outlined),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildKelasDropdown(List<Kelas> kelasList) {
-    final filteredKelasList = kelasList
-        .where((kelas) => kelas.mJurusanId == _selectedJurusanId)
-        .toList();
-
-    if (_selectedKelasId != null &&
-        !filteredKelasList.any((kelas) => kelas.id == _selectedKelasId)) {
-      _selectedKelasId = null;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: DropdownButtonFormField<int>(
-        isExpanded: true,
-        initialValue: _selectedKelasId,
-
-        // --- PROPERTI BARU (DITERAPKAN JUGA DI SINI) ---
-        menuMaxHeight: 300.0,
-        dropdownColor: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-
-        // ---------------------------------------------
-        items: filteredKelasList.map((kelas) {
-          return DropdownMenuItem<int>(
-            value: kelas.id,
-            child: Expanded(
-              child: Text(kelas.name, overflow: TextOverflow.ellipsis),
-            ),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            _selectedKelasId = value;
-          });
-        },
-        decoration: InputDecoration(
-          labelText: 'Kelas',
-          prefixIcon: const Icon(Icons.class_outlined),
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          hintText: _selectedJurusanId == null
-              ? 'Pilih Jurusan terlebih dahulu'
-              : 'Pilih Kelas',
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool enabled = true,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        enabled: _isEditing && enabled,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          filled: !_isEditing || !enabled,
-          disabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-            borderSide: BorderSide(color: Colors.grey),
-          ),
-        ),
       ),
     );
   }
