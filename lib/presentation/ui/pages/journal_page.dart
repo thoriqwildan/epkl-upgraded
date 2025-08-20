@@ -1,6 +1,3 @@
-// lib/presentation/ui/pages/journal_list_page.dart
-
-import 'package:animations/animations.dart';
 import 'package:epkl/data/models/journal.dart';
 import 'package:epkl/presentation/providers/journal_provider.dart';
 import 'package:epkl/presentation/ui/pages/add_journal_page.dart';
@@ -73,8 +70,8 @@ class JournalListPage extends ConsumerWidget {
             MaterialPageRoute(builder: (context) => const AddJournalPage()),
           );
         },
-        child: const Icon(Icons.add),
         tooltip: 'Tambah Jurnal',
+        child: const Icon(Icons.add),
       ),
     );
   }

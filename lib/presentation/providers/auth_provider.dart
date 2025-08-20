@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:epkl/data/models/login_response.dart';
 import 'package:epkl/data/services/api_service.dart';
 import 'package:epkl/data/services/secure_storage_service.dart';
 import 'package:epkl/presentation/providers/attendance_status_provider.dart';

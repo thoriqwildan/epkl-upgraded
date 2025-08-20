@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, unused_local_variable
+
 import 'dart:io';
 
 import 'package:epkl/data/models/jurusan.dart';
@@ -5,7 +7,6 @@ import 'package:epkl/data/models/kelas.dart';
 import 'package:epkl/presentation/providers/auth_provider.dart';
 import 'package:epkl/presentation/providers/auth_state.dart';
 import 'package:epkl/presentation/providers/master_data_provider.dart';
-import 'package:epkl/presentation/ui/pages/login_page.dart';
 import 'package:epkl/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -314,7 +315,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<int>(
         isExpanded: true,
-        value: _selectedJurusanId,
+        initialValue: _selectedJurusanId,
 
         // --- PROPERTI BARU UNTUK STYLING ---
         menuMaxHeight: 300.0, // Batasi tinggi menu maksimal 300 pixel
@@ -360,7 +361,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<int>(
         isExpanded: true,
-        value: _selectedKelasId,
+        initialValue: _selectedKelasId,
 
         // --- PROPERTI BARU (DITERAPKAN JUGA DI SINI) ---
         menuMaxHeight: 300.0,

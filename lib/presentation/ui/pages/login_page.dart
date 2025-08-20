@@ -13,11 +13,11 @@ class LoginPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Controller dan form key tidak perlu diubah
-    final _emailController = TextEditingController(
+    final emailController = TextEditingController(
       text: "wildanthoriq14@gmail.com",
     );
-    final _passwordController = TextEditingController(text: "Wildan14#");
-    final _formKey = GlobalKey<FormState>();
+    final passwordController = TextEditingController(text: "Wildan14#");
+    final formKey = GlobalKey<FormState>();
 
     // Bagian ref.listen ini sudah benar, tidak perlu diubah
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
@@ -45,13 +45,13 @@ class LoginPage extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
-                controller: _emailController,
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'Email',
@@ -67,7 +67,7 @@ class LoginPage extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _passwordController,
+                controller: passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Password',
@@ -91,12 +91,12 @@ class LoginPage extends ConsumerWidget {
                         const Center(child: CircularProgressIndicator()),
                     orElse: () => ElevatedButton(
                       onPressed: () {
-                        if (_formKey.currentState!.validate()) {
+                        if (formKey.currentState!.validate()) {
                           ref
                               .read(authNotifierProvider.notifier)
                               .login(
-                                _emailController.text,
-                                _passwordController.text,
+                                emailController.text,
+                                passwordController.text,
                               );
                         }
                       },

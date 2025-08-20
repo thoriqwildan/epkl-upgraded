@@ -113,8 +113,9 @@ class _HomePageState extends ConsumerState<HomePage>
 
       if (mounted) showAppSnackBar(context, message: successMessage);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         showAppSnackBar(context, message: e.toString(), isError: true);
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -123,7 +124,7 @@ class _HomePageState extends ConsumerState<HomePage>
   @override
   Widget build(BuildContext context) {
     final statusState = ref.watch(attendanceStatusProvider);
-    final authState = ref.watch(authNotifierProvider);
+    // final authState = ref.watch(authNotifierProvider);
     bool isButtonDisabled =
         _isSubmitting ||
         (_currentDistance != null && _currentDistance! > 100 && !_isOffSite);
