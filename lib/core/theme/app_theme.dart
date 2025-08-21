@@ -53,63 +53,42 @@ final AppTheme hijauAlamDarkTheme = AppTheme(
   name: 'Hijau Alam (Gelap)',
   themeData: ThemeData(
     useMaterial3: true,
-    brightness:
-        Brightness.dark, // Penting untuk menandakan ini adalah tema gelap
-    primaryColor: const Color(
-      0xFF85C982,
-    ), // Versi hijau yang lebih terang untuk kontras
-    scaffoldBackgroundColor: const Color(
-      0xFF1A282D,
-    ), // Latar belakang utama yang sangat gelap
+    brightness: Brightness.dark,
+    primaryColor: const Color(0xFF85C982),
+    scaffoldBackgroundColor: const Color(0xFF1A282D),
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF6BA368),
-      brightness: Brightness.dark, // Pastikan ColorScheme juga dalam mode gelap
-      primary: const Color(0xFF85C982), // Hijau terang sebagai warna utama
-      secondary: const Color(
-        0xFF9CFC97,
-      ), // Hijau neon tetap cocok sebagai aksen
-      background: const Color(0xFF1A282D), // Warna background utama
-      surface: const Color(
-        0xFF2C3E3B,
-      ), // Warna permukaan (Card, Dialog) sedikit lebih terang
-      onPrimary: const Color(
-        0xFF0F1F0E,
-      ), // Warna teks di atas tombol primer (kontras tinggi)
-      onBackground: const Color(0xFFE1E3DE), // Warna teks utama (putih pudar)
-      onSurface: const Color(
-        0xFFE1E3DE,
-      ), // Warna teks di atas permukaan (putih pudar)
-      error: const Color(
-        0xFFFFB4AB,
-      ), // Warna merah yang lebih terang agar terlihat di background gelap
+      brightness: Brightness.dark,
+      primary: const Color(0xFF85C982),
+      secondary: const Color(0xFF9CFC97),
+      background: const Color(0xFF1A282D),
+      surface: const Color(0xFF2C3E3B),
+      onPrimary: const Color(0xFF0F1F0E),
+      onBackground: const Color(0xFFE1E3DE),
+      onSurface: const Color(0xFFE1E3DE),
+      error: const Color(0xFFFFB4AB),
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(
-        0xFF2C3E3B,
-      ), // Menggunakan warna surface untuk AppBar
-      foregroundColor: Color(0xFFE1E3DE), // Warna ikon dan judul di AppBar
+      backgroundColor: Color(0xFF2C3E3B),
+      foregroundColor: Color(0xFFE1E3DE),
       elevation: 1.0,
     ),
     textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Color(0xFFE1E3DE)), // Teks default
-      bodyLarge: TextStyle(color: Color(0xFFE1E3DE)), // Teks default
-      titleMedium: TextStyle(
-        color: Color(0xFFCFD2CC),
-      ), // Judul dengan kontras sedikit lebih rendah
+      bodyMedium: TextStyle(color: Color(0xFFE1E3DE)),
+      bodyLarge: TextStyle(color: Color(0xFFE1E3DE)),
+      titleMedium: TextStyle(color: Color(0xFFCFD2CC)),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF85C982), // Warna primer
-        foregroundColor: const Color(0xFF0F1F0E), // Teks di atas tombol
+        backgroundColor: const Color(0xFF85C982),
+        foregroundColor: const Color(0xFF0F1F0E),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Color(
-        0xFF2C3E3B,
-      ), // Warna surface, konsisten dengan AppBar
-      selectedItemColor: Color(0xFF85C982), // Warna primer untuk item aktif
-      unselectedItemColor: Colors.grey, // Abu-abu untuk item tidak aktif
+      backgroundColor: Color(0xFF2C3E3B),
+      selectedItemColor: Color(0xFF85C982),
+      unselectedItemColor: Colors.grey,
     ),
   ),
 );
