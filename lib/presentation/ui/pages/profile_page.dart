@@ -8,6 +8,7 @@ import 'package:epkl/presentation/providers/master_data_provider.dart';
 import 'package:epkl/presentation/ui/widgets/jurusan_dropdown_field.dart';
 import 'package:epkl/presentation/ui/widgets/kelas_dropdown_field.dart';
 import 'package:epkl/presentation/ui/widgets/profile_text_field.dart';
+import 'package:epkl/presentation/ui/widgets/shimmer_form_field.dart';
 import 'package:epkl/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -278,8 +279,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       });
                     },
                   ),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const ShimmerFormField(),
                   error: (e, st) => Text('Gagal memuat jurusan: $e'),
                 ),
 
@@ -296,8 +296,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       });
                     },
                   ),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const ShimmerFormField(),
                   error: (e, st) => Text('Gagal memuat kelas: $e'),
                 ),
 

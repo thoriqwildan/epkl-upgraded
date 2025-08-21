@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:epkl/presentation/ui/pages/page_test.dart';
 import 'package:epkl/presentation/ui/pages/secret_setting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -66,7 +67,11 @@ class _AboutPageState extends State<AboutPage> {
           // Logo dengan gestur tap rahasia
           GestureDetector(
             onTap: _handleLogoTap,
-            child: Image.asset('assets/images/smk2-logo.png', height: 100),
+            child: Image(
+              image: AssetImage('assets/images/smk2-logo.png'),
+              width: 200,
+              height: 200,
+            ),
           ),
           const SizedBox(height: 20),
           const Text(
@@ -106,15 +111,6 @@ class _AboutPageState extends State<AboutPage> {
   Widget _buildInteractionSection(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          leading: const Icon(Icons.rate_review_outlined),
-          title: const Text('Beri Rating Aplikasi'),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () {
-            // TODO: Implementasi buka URL ke Play Store/App Store.
-            // Anda bisa menggunakan package 'url_launcher'.
-          },
-        ),
         ListTile(
           leading: const Icon(Icons.share_outlined),
           title: const Text('Bagikan Aplikasi'),

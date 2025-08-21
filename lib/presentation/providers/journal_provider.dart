@@ -7,10 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class JournalNotifier extends StateNotifier<AsyncValue<List<Journal>>> {
   final Ref _ref;
 
-  JournalNotifier(this._ref) : super(const AsyncValue.loading()) {
-    // Langsung panggil fetchJournal saat notifier pertama kali dibuat
-    fetchJournal();
-  }
+  JournalNotifier(this._ref) : super(const AsyncValue.loading());
 
   Future<void> fetchJournal() async {
     if (!mounted) return;
@@ -23,15 +20,16 @@ class JournalNotifier extends StateNotifier<AsyncValue<List<Journal>>> {
         success: (user) => user.nisn,
         orElse: () => null,
       );
-
-      if (nisn == null) {
-        throw Exception("User not logged in");
-      }
+      if (nisn == null) throw Exception("User not logged in");
 
       final journalList = await apiService.getJournalList(nisn: nisn);
-      state = AsyncValue.data(journalList);
+      if (mounted) {
+        state = AsyncValue.data(journalList);
+      }
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (mounted) {
+        state = AsyncValue.error(e, st);
+      }
     }
   }
 

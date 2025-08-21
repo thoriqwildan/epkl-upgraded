@@ -201,7 +201,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       children: [
         Image.asset(
           'assets/images/smk2-logo.png',
-          height: 140, // Logo lebih besar
+          height: 190, // Logo lebih besar
           errorBuilder: (context, error, stackTrace) => Icon(
             Icons.school,
             size: 100,
