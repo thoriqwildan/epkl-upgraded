@@ -1,5 +1,3 @@
-// lib/presentation/ui/pages/login_page.dart
-
 import 'package:epkl/presentation/providers/auth_provider.dart';
 import 'package:epkl/presentation/providers/auth_state.dart';
 import 'package:epkl/presentation/ui/pages/main_page.dart';
@@ -12,36 +10,29 @@ class LoginPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Controller dan form key tidak perlu diubah
-    final emailController = TextEditingController(
-      text: "wildanthoriq14@gmail.com",
-    );
-    final passwordController = TextEditingController(text: "Wildan14#");
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
-    // Bagian ref.listen ini sudah benar, tidak perlu diubah
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       next.when(
         initial: () {},
         loading: () {},
         success: (user) {
-          // Panggil helper kita
           showAppSnackBar(context, message: 'Selamat datang, ${user.name}!');
 
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const MainPage()),
-            (route) => false, // Hapus semua halaman sebelumnya
+            (route) => false,
           );
         },
         error: (message) {
-          // Panggil helper kita dengan flag error
           showAppSnackBar(context, message: message, isError: true);
         },
       );
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login Siswa')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -108,7 +99,6 @@ class LoginPage extends ConsumerWidget {
                   );
                 },
               ),
-              // ==========================================================
             ],
           ),
         ),

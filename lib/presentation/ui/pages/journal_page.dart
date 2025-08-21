@@ -97,11 +97,9 @@ class JournalCard extends StatelessWidget {
                 'EEEE, d MMMM yyyy',
                 'id_ID',
               ).format(DateTime.parse(journal.tanggal)),
-              style: const TextStyle(
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors
-                    .white, // Anda mungkin ingin mengubah ini ke warna tema
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const Divider(height: 20),

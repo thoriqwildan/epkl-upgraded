@@ -74,7 +74,9 @@ class _MainPageState extends State<MainPage> {
         // Properti lain untuk styling
         color: Theme.of(context).bottomNavigationBarTheme.backgroundColor!,
         backgroundColor: Colors.transparent,
-        buttonBackgroundColor: Theme.of(context).primaryColor,
+        buttonBackgroundColor: Theme.of(
+          context,
+        ).bottomNavigationBarTheme.backgroundColor!,
         animationCurve: Curves.easeInOut,
         animationDuration: const Duration(milliseconds: 400),
         height: 65,
