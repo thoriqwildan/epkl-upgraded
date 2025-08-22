@@ -3,6 +3,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:epkl/data/services/location_service.dart';
+import 'package:epkl/data/services/update_service.dart';
 import 'package:epkl/presentation/providers/auth_provider.dart';
 import 'package:epkl/presentation/providers/attendance_status_provider.dart';
 import 'package:epkl/presentation/providers/auth_state.dart';
@@ -48,9 +49,9 @@ class _HomePageState extends ConsumerState<HomePage>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_isOffSite) {
-        _updateDistance();
-      }
+      if (!_isOffSite) _updateDistance();
+
+      UpdateService().checkForUpdate(context);
     });
   }
 
