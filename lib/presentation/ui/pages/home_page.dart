@@ -114,6 +114,11 @@ class _HomePageState extends ConsumerState<HomePage>
     }
   }
 
+  Future<void> refreshAttendance() async {
+    ref.read(attendanceStatusProvider.notifier).fetchStatus();
+    _updateDistance();
+  }
+
   Future<void> _handleAttendanceAction({required bool isCheckingIn}) async {
     if (_isOffSite && !_formKey.currentState!.validate()) {
       return;
@@ -200,8 +205,7 @@ class _HomePageState extends ConsumerState<HomePage>
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () =>
-            ref.read(attendanceStatusProvider.notifier).fetchStatus(),
+        onRefresh: () => refreshAttendance(),
         child: statusState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) =>

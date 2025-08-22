@@ -33,21 +33,31 @@ class JurusanDropdownField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<int>(
         isExpanded: true,
-        initialValue: selectedJurusanId,
+        // --- PERBAIKAN #1: Menggunakan 'value' untuk state yang lebih robust ---
+        // 'value' akan selalu merefleksikan state terbaru dari parent widget,
+        // tidak seperti 'initialValue' yang hanya diatur sekali.
+        value: selectedJurusanId,
         menuMaxHeight: 300.0,
         borderRadius: BorderRadius.circular(12),
         items: jurusanList.map((jurusan) {
           return DropdownMenuItem<int>(
             value: jurusan.id,
-            child: Expanded(
-              child: Text(jurusan.name, overflow: TextOverflow.ellipsis),
-            ),
+            // --- PERBAIKAN #2 (UTAMA): Menghapus widget 'Expanded' ---
+            // 'Expanded' tidak boleh digunakan di sini dan merupakan penyebab
+            // bug tampilan di perangkat yang berbeda.
+            child: Text(jurusan.name, overflow: TextOverflow.ellipsis),
           );
         }).toList(),
         onChanged: onChanged,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'Jurusan',
-          prefixIcon: Icon(Icons.school_outlined),
+          prefixIcon: Icon(
+            Icons.school_outlined,
+            color: Theme.of(context).primaryColor,
+          ),
+          // Properti 'filled' dan 'fillColor' di sini tidak terlalu efektif
+          // karena field ini hanya muncul saat isEditing = true.
+          // Jadi bisa dihapus jika mau.
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),

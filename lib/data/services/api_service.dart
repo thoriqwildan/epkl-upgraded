@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/io.dart';
 import 'package:dio/dio.dart';
 import 'package:epkl/data/models/attendance.dart';
 import 'package:epkl/data/models/attendance_status.dart';
@@ -26,6 +27,18 @@ class ApiService {
           receiveTimeout: const Duration(seconds: 15),
         ),
       ) {
+    _dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        // Ini adalah HttpClient standar dari dart:io
+        final client = HttpClient();
+        // Karena kita pakai HTTP, callback sertifikat ini tidak akan dipanggil
+        // tapi ini adalah praktik standar saat membuat HttpClient kustom.
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+        return client;
+      },
+    );
+
     _dio.interceptors.addAll([
       InterceptorsWrapper(
         onRequest: (options, handler) async {

@@ -71,7 +71,9 @@ class AttendanceNotifier extends StateNotifier<AsyncValue<List<Attendance>>> {
         dateStart: filter.start,
         dateEnd: filter.end,
       );
-      state = AsyncValue.data(attendanceList);
+
+      final reversedList = attendanceList.reversed.toList();
+      state = AsyncValue.data(reversedList);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

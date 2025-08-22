@@ -39,21 +39,22 @@ class KelasDropdownField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<int>(
         isExpanded: true,
-        initialValue: selectedKelasId,
+        value: selectedKelasId,
         menuMaxHeight: 300.0,
         borderRadius: BorderRadius.circular(12),
         items: filteredKelasList.map((kelas) {
           return DropdownMenuItem<int>(
             value: kelas.id,
-            child: Expanded(
-              child: Text(kelas.name, overflow: TextOverflow.ellipsis),
-            ),
+            child: Text(kelas.name, overflow: TextOverflow.ellipsis),
           );
         }).toList(),
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: 'Kelas',
-          prefixIcon: const Icon(Icons.class_outlined),
+          prefixIcon: Icon(
+            Icons.class_outlined,
+            color: Theme.of(context).primaryColor,
+          ),
           border: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
