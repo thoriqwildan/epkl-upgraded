@@ -7,7 +7,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class JournalNotifier extends StateNotifier<AsyncValue<List<Journal>>> {
   final Ref _ref;
 
-  JournalNotifier(this._ref) : super(const AsyncValue.loading());
+  JournalNotifier(this._ref) : super(const AsyncValue.loading()) {
+    // Listener ini tetap penting untuk bereaksi terhadap perubahan (spt logout)
+    _ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      next.maybeWhen(
+        // Cukup handle kasus logout di sini untuk membersihkan state
+        orElse: () {
+          if (state.hasValue) {
+            state = const AsyncValue.data([]);
+          }
+        },
+      );
+    });
+
+    final currentAuthState = _ref.read(authNotifierProvider);
+    currentAuthState.maybeWhen(
+      success: (user) {
+        fetchJournal();
+      },
+      orElse: () {
+        state = const AsyncValue.data([]);
+      },
+    );
+  }
 
   Future<void> fetchJournal() async {
     if (!mounted) return;

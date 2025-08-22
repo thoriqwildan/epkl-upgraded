@@ -16,13 +16,45 @@ class DateFilter {
 class AttendanceNotifier extends StateNotifier<AsyncValue<List<Attendance>>> {
   final Ref _ref;
 
-  AttendanceNotifier(this._ref) : super(const AsyncValue.loading());
+  AttendanceNotifier(this._ref) : super(const AsyncValue.loading()) {
+    // Listener ini tetap berguna untuk mereset state jika user logout.
+    _ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      next.maybeWhen(
+        orElse: () {
+          state = const AsyncValue.data([]);
+        },
+      );
+    });
+
+    // --- AWAL DARI SOLUSI ---
+    // Langsung periksa state otentikasi saat ini, jangan hanya menunggu perubahan.
+    final currentAuthState = _ref.read(authNotifierProvider);
+    currentAuthState.maybeWhen(
+      success: (user) {
+        // Jika user sudah login, langsung panggil fetch data dengan filter default.
+        print(
+          'Auth state is already success, fetching initial attendance list...',
+        );
+        final now = DateTime.now();
+        fetchAttendance(
+          DateFilter(start: DateTime(now.year, now.month, 1), end: now),
+        );
+      },
+      orElse: () {
+        // Jika karena suatu alasan user tidak login, set state ke data kosong.
+        state = const AsyncValue.data([]);
+      },
+    );
+    // --- AKHIR DARI SOLUSI ---
+  }
 
   Future<void> fetchAttendance(DateFilter filter) async {
     state = const AsyncValue.loading();
     try {
       final authState = _ref.read(authNotifierProvider);
       final apiService = _ref.read(apiServiceProvider);
+
+      print('Fetching attendance from ${filter.start} to ${filter.end}');
 
       // Ambil NISN dari auth state
       final nisn = authState.maybeWhen(

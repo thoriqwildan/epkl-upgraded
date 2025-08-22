@@ -17,7 +17,15 @@ class ApiService {
   final Dio _dio;
 
   ApiService(SecureStorageService storageService)
-    : _dio = Dio(BaseOptions(baseUrl: 'http://epkl.smk2-yk.sch.id/api')) {
+    // --- SOLUSI: TAMBAHKAN TIMEOUT ---
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: 'http://epkl.smk2-yk.sch.id/api',
+          // Set timeout ke 15 detik (atau sesuai kebutuhan)
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      ) {
     _dio.interceptors.addAll([
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -162,6 +170,7 @@ class ApiService {
           'date_end': formatter.format(dateEnd),
         },
       );
+      print('Attendance response: ${response.data}');
       final List<dynamic> listData = response.data['data'];
       return listData.map((json) => Attendance.fromJson(json)).toList();
     } on DioException catch (e) {
@@ -217,7 +226,7 @@ class ApiService {
   }) async {
     try {
       final response = await _dio.get(
-        '/attendance/',
+        '/attendance',
         queryParameters: {'nisn': nisn},
       );
       return AttendanceStatus.fromJson(response.data);

@@ -5,26 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class JournalListPage extends ConsumerStatefulWidget {
+class JournalListPage extends ConsumerWidget {
   const JournalListPage({super.key});
 
   @override
-  ConsumerState<JournalListPage> createState() => _JournalListPageState();
-}
-
-class _JournalListPageState extends ConsumerState<JournalListPage> {
-  @override
-  void initState() {
-    super.initState();
-    // Gunakan addPostFrameCallback untuk memastikan 'ref' siap digunakan
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Perintahkan notifier untuk mengambil data
-      ref.read(journalNotifierProvider.notifier).fetchJournal();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final journalState = ref.watch(journalNotifierProvider);
 
     return Scaffold(

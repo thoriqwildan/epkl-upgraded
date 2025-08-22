@@ -18,13 +18,10 @@ class _AttendanceListPageState extends ConsumerState<AttendanceListPage> {
   @override
   void initState() {
     super.initState();
+    // Kita tidak perlu lagi memanggil fetch data dari sini
     final now = DateTime.now();
     _startDate = DateTime(now.year, now.month, 1);
     _endDate = now;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchData();
-    });
   }
 
   Future<void> _fetchData() async {
