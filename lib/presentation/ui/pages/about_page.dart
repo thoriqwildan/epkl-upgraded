@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:epkl/presentation/ui/pages/secret_setting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -14,6 +17,22 @@ class AboutPage extends StatefulWidget {
 class _AboutPageState extends State<AboutPage> {
   int _tapCount = 0;
   Timer? _tapTimer;
+  String _appVersion = 'Memuat ...';
+
+  @override
+  void initState() {
+    super.initState();
+    _getAppVersion();
+  }
+
+  Future<void> _getAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() {
+        _appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+      });
+    }
+  }
 
   void _handleLogoTap() {
     _tapCount++;
@@ -57,19 +76,17 @@ class _AboutPageState extends State<AboutPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    const String appVersion = '1.0.0'; // Sebaiknya ambil dari package_info_plus
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 24.0),
       child: Column(
         children: [
-          // Logo dengan gestur tap rahasia
           GestureDetector(
             onTap: _handleLogoTap,
-            child: Image(
-              image: AssetImage('assets/images/smk2-logo.png'),
-              width: 200,
-              height: 200,
+            child: Image.asset(
+              // Gunakan Image.asset untuk logo dari assets
+              'assets/images/smk2-logo.png', // Pastikan path ini benar
+              width: 120, // Ukuran bisa disesuaikan
+              height: 120,
             ),
           ),
           const SizedBox(height: 20),
@@ -78,11 +95,10 @@ class _AboutPageState extends State<AboutPage> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          // Versi aplikasi yang bisa di-tap untuk menyalin
           InkWell(
             borderRadius: BorderRadius.circular(8),
             onTap: () {
-              Clipboard.setData(const ClipboardData(text: appVersion));
+              Clipboard.setData(ClipboardData(text: _appVersion));
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Versi aplikasi disalin ke clipboard.'),
@@ -95,8 +111,9 @@ class _AboutPageState extends State<AboutPage> {
                 horizontal: 8.0,
                 vertical: 4.0,
               ),
+              // Gunakan state _appVersion yang sudah dinamis
               child: Text(
-                'Versi $appVersion',
+                'Versi $_appVersion',
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
             ),
@@ -115,8 +132,11 @@ class _AboutPageState extends State<AboutPage> {
           title: const Text('Bagikan Aplikasi'),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () {
-            // TODO: Implementasi fungsi share.
-            // Anda bisa menggunakan package 'share_plus'.
+            // --- IMPLEMENTASI FUNGSI SHARE ---
+            // Ganti teks dan link sesuai kebutuhan Anda
+            Share.share(
+              'Coba aplikasi E-PKL SMKN 2 Yogyakarta! [Link Download di Sini]',
+            );
           },
         ),
         ListTile(
@@ -124,8 +144,15 @@ class _AboutPageState extends State<AboutPage> {
           title: const Text('Hubungi Dukungan'),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () {
-            // TODO: Implementasi buka email client (mailto).
-            // Anda bisa menggunakan package 'url_launcher'.
+            // --- IMPLEMENTASI BUKA EMAIL CLIENT ---
+            final Uri emailLaunchUri = Uri(
+              scheme: 'mailto',
+              path:
+                  'wildanthoriq14@gmail.com', // Ganti dengan email dukungan Anda
+              query:
+                  'subject=Dukungan Aplikasi EPKL v$_appVersion', // Subjek email
+            );
+            launchUrl(emailLaunchUri);
           },
         ),
       ],
@@ -159,9 +186,11 @@ class _AboutPageState extends State<AboutPage> {
           onTap: () => showLicensePage(
             context: context,
             applicationName: 'Aplikasi EPKL',
-            applicationVersion: '1.0.0',
-            applicationIcon:
-                const FlutterLogo(), // atau Image.asset('path/logo.png')
+            applicationVersion: _appVersion, // Gunakan versi dinamis
+            applicationIcon: Image.asset(
+              'assets/images/smk2-logo.png',
+              width: 48,
+            ), // Gunakan logo Anda
           ),
         ),
       ],
