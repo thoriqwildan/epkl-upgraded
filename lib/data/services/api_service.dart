@@ -9,6 +9,7 @@ import 'package:epkl/data/models/info_list_response.dart';
 import 'package:epkl/data/models/journal.dart';
 import 'package:epkl/data/models/jurusan.dart';
 import 'package:epkl/data/models/kelas.dart';
+import 'package:epkl/data/models/register_request.dart';
 import 'package:epkl/data/models/user_response.dart';
 import 'package:intl/intl.dart';
 import '../models/login_response.dart';
@@ -58,6 +59,27 @@ class ApiService {
       ),
       LogInterceptor(requestBody: true, responseBody: true),
     ]);
+  }
+
+  Future<User> register({required RegisterRequest request}) async {
+    try {
+      final response = await _dio.post(
+        '/siswa/register',
+        data: request.toJson(),
+      );
+
+      if (response.data['success'] == true) {
+        return User.fromJson(response.data['data']);
+      } else {
+        throw Exception(
+          response.data['message'] ?? 'Gagal melakukan registrasi.',
+        );
+      }
+    } on DioException catch (e) {
+      final errorMessage =
+          e.response?.data['message'] ?? 'Terjadi kesalahan jaringan.';
+      throw Exception(errorMessage);
+    }
   }
 
   Future<LoginResponse> login(String email, String password) async {

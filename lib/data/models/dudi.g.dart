@@ -11,6 +11,8 @@ Dudi _$DudiFromJson(Map<String, dynamic> json) => Dudi(
   name: json['name'] as String,
   address: json['address'] as String,
   logo: json['logo'] as String?,
+  contact: json['contact'] as String?,
+  pic: json['pic'] as String?,
 );
 
 Map<String, dynamic> _$DudiToJson(Dudi instance) => <String, dynamic>{
@@ -18,4 +20,6 @@ Map<String, dynamic> _$DudiToJson(Dudi instance) => <String, dynamic>{
   'name': instance.name,
   'address': instance.address,
   'logo': instance.logo,
+  'contact': instance.contact,
+  'pic': instance.pic,
 };

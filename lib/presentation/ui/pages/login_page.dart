@@ -2,6 +2,7 @@ import 'dart:ui'; // Diperlukan untuk ImageFilter.blur
 import 'package:epkl/presentation/providers/auth_provider.dart';
 import 'package:epkl/presentation/providers/auth_state.dart';
 import 'package:epkl/presentation/ui/pages/main_page.dart';
+import 'package:epkl/presentation/ui/pages/register_page.dart';
 import 'package:epkl/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -259,6 +260,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 _buildForgotPasswordButton(), // Tambahan
                 const SizedBox(height: 24),
                 _buildLoginButton(context),
+                const SizedBox(height: 24),
+                _buildRegisterButton(theme),
               ],
             ),
           ),
@@ -293,6 +296,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         }
         return null;
       },
+    );
+  }
+
+  Widget _buildRegisterButton(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Belum punya akun?'),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const RegisterPage()),
+            );
+          },
+          child: const Text('Daftar di sini'),
+        ),
+      ],
     );
   }
 
