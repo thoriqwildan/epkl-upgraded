@@ -132,10 +132,8 @@ class _AboutPageState extends State<AboutPage> {
           title: const Text('Bagikan Aplikasi'),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () {
-            // --- IMPLEMENTASI FUNGSI SHARE ---
-            // Ganti teks dan link sesuai kebutuhan Anda
             Share.share(
-              'Coba aplikasi E-PKL SMKN 2 Yogyakarta! [Link Download di Sini]',
+              'Coba aplikasi E-PKL SMKN 2 Yogyakarta! https://api.github.com/repos/thoriqwildan/epkl-upgraded/releases/latest',
             );
           },
         ),
@@ -144,11 +142,9 @@ class _AboutPageState extends State<AboutPage> {
           title: const Text('Hubungi Dukungan'),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () {
-            // --- IMPLEMENTASI BUKA EMAIL CLIENT ---
             final Uri emailLaunchUri = Uri(
               scheme: 'mailto',
-              path:
-                  'wildanthoriq14@gmail.com', // Ganti dengan email dukungan Anda
+              path: 'wildanthoriq14@gmail.com',
               query:
                   'subject=Dukungan Aplikasi EPKL v$_appVersion', // Subjek email
             );
@@ -159,7 +155,6 @@ class _AboutPageState extends State<AboutPage> {
     );
   }
 
-  // Widget untuk bagian Legal
   Widget _buildLegalSection(BuildContext context) {
     return Column(
       children: [
@@ -186,18 +181,17 @@ class _AboutPageState extends State<AboutPage> {
           onTap: () => showLicensePage(
             context: context,
             applicationName: 'Aplikasi EPKL',
-            applicationVersion: _appVersion, // Gunakan versi dinamis
+            applicationVersion: _appVersion,
             applicationIcon: Image.asset(
               'assets/images/smk2-logo.png',
               width: 48,
-            ), // Gunakan logo Anda
+            ),
           ),
         ),
       ],
     );
   }
 
-  // Widget untuk bagian Footer
   Widget _buildFooter(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 24.0),
