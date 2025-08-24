@@ -18,21 +18,16 @@ class ApiService {
   final Dio _dio;
 
   ApiService(SecureStorageService storageService)
-    // --- SOLUSI: TAMBAHKAN TIMEOUT ---
     : _dio = Dio(
         BaseOptions(
-          baseUrl: 'http://epkl.smk2-yk.sch.id/api',
-          // Set timeout ke 15 detik (atau sesuai kebutuhan)
+          baseUrl: 'https://epkl.thoriqwildan.my.id/api',
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 15),
         ),
       ) {
     _dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
-        // Ini adalah HttpClient standar dari dart:io
         final client = HttpClient();
-        // Karena kita pakai HTTP, callback sertifikat ini tidak akan dipanggil
-        // tapi ini adalah praktik standar saat membuat HttpClient kustom.
         client.badCertificateCallback =
             (X509Certificate cert, String host, int port) => true;
         return client;
